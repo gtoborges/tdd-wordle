@@ -3,7 +3,7 @@ import WordleBoard from './components/WordleBoard.vue'
 </script>
 
 <template>
-  <WordleBoard msg="Hello World"/>
+  <WordleBoard wordOfTheDay="Hello World"/>
 </template>
 
 <style scoped>
