@@ -2,7 +2,7 @@
 import { VICTORY_MESSAGE, DEFEAT_MESSAGE, WORD_SIZE } from '@/settings'
 import englishWords from "@/englishWordsWith5Letters.json"
 import { ref } from 'vue';
-import { computed } from '@vue/reactivity';
+import { computed, triggerRef } from '@vue/reactivity';
 defineProps({
   wordOfTheDay: {
     type: String,
@@ -10,31 +10,33 @@ defineProps({
   }
 })
 
-const guessInProgress = ref("")
+const guessInProgress = ref<string|null>(null)
 const guessSubmitted = ref("")
 
-const formattedGuessInProgress = computed({
+const formattedGuessInProgress = computed<string>({
   get() {
-    return guessInProgress.value
+    return guessInProgress.value ?? ""
   },
   set(rawValue: string) {
-    guessInProgress.value = rawValue
-      .slice(0, WORD_SIZE)
-      .toUpperCase()
-      .replace(/[^A-Z]+/gi, "")
+    guessInProgress.value = null
+    const newValue = rawValue.slice(0, WORD_SIZE).toUpperCase().replace(/[^A-Z]+/gi, "")
+    guessInProgress.value = newValue
+    triggerRef(formattedGuessInProgress); // force update, computed only trigger if its computed value has changed from the previous one
   }
 })
 
 const onSubmit = () => {
-  if(!englishWords.includes(guessInProgress.value)) return
-  guessSubmitted.value = guessInProgress.value
+  if(!englishWords.includes(formattedGuessInProgress.value)) {
+    return
+  }
+  guessSubmitted.value = formattedGuessInProgress.value
 }
 </script>
 
 <template>
-  <input type="text" 
-    maxlength="5"
-    v-model="formattedGuessInProgress" 
+  <input v-model="formattedGuessInProgress"
+    :maxlength="WORD_SIZE"
+    type="text" 
     @keydown.enter="onSubmit"
   >
   <p v-if="guessSubmitted.length > 0"
