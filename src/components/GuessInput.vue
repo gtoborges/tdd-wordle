@@ -43,6 +43,8 @@ const onSubmit = () => {
   <input v-model="formattedGuessInProgress"
     :maxlength="WORD_SIZE"
     type="text" 
+    autofocus
+    @blur="({target}) => (target as HTMLInputElement).focus()"
     @keydown.enter="onSubmit"
   >
 </template>

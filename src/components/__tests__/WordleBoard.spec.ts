@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils'
 import WordleBoard from '../WordleBoard.vue'
-import { VICTORY_MESSAGE, DEFEAT_MESSAGE } from '@/settings'
+import { VICTORY_MESSAGE, DEFEAT_MESSAGE, WORD_SIZE } from '@/settings'
 
 describe('WordleBoard', () => {
   let wordOfTheDay = "TESTS"
@@ -61,7 +61,20 @@ describe('WordleBoard', () => {
   })
   
   describe("Player input", () => {
-    test("player guesses are limited to 5 letters", async () => {
+    test("remains in focus the entire time", async () => {
+      document.body.innerHTML = `<div id="app"></div>`
+      wrapper = mount(WordleBoard, {
+        props: {wordOfTheDay},
+        attachTo: "#app"
+      })
+
+      expect(wrapper.find("input[type=text]").attributes("autofocus")).not.toBeUndefined()
+
+      await wrapper.find("input[type=text]").trigger("blur")
+      expect(document.activeElement).toBe(wrapper.find("input[type=text]").element)
+    })
+
+    test(`player guesses are limited to ${WORD_SIZE} letters`, async () => {
       await playerSubmitsGuess(wordOfTheDay + "EXTRA")
 
       expect(wrapper.text()).toContain(VICTORY_MESSAGE)
